@@ -5,7 +5,7 @@ import scipy.fftpack as fftpack
 import zlib
 from utils import *
 
-class jpeg_encoder:
+class jpeg:
     
     def __init__(self, im,quants):
         self.image = im
@@ -57,7 +57,7 @@ class jpeg_encoder:
 if __name__ == "__main__":
     im = cv2.imread("IMG_0108.JPG")
     Ycr = rgb2ycbcr(im);
-    obj=jpeg_encoder(Ycr,[5])
+    obj=jpeg(Ycr,[5])
     quants = [5]  # [0.5, 1, 2, 5, 10]
     blocks = [(8, 8)]  # [(2, 8), (8, 8), (16, 16), (32, 32), (200, 200)]
     for qscale in quants:
