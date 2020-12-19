@@ -73,7 +73,7 @@ class jpeg:
 
     
 if __name__ == "__main__":
-    im = cv2.imread("./Data/study jams.png")
+    im = cv2.imread("./Data/IMG2.jpg")
     Ycr = rgb2ycbcr(im);
     obj=jpeg(Ycr,[5])
     quants = [5] 
