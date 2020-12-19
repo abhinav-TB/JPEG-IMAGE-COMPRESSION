@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 import numpy as np
 import cv2
 import scipy.fftpack as fftpack
@@ -52,29 +52,32 @@ class jpeg:
 
     def decode_zip(self):
         return np.frombuffer(zlib.decompress(self.encz), dtype=np.int8).astype(float).reshape(self.encq.shape)
-
     
-if __name__ == "__main__":
-    im = cv2.imread("IMG_0108.JPG")
-    Ycr = rgb2ycbcr(im);
-    obj=jpeg(Ycr,[5])
-    quants = [5]  # [0.5, 1, 2, 5, 10]
-    blocks = [(8, 8)]  # [(2, 8), (8, 8), (16, 16), (32, 32), (200, 200)]
-    for qscale in quants:
-        for bx, by in blocks:
 
-            quant = (
+    def intiate(self,qscale,bx,by):
+
+        quant = (
                 (np.ones((bx, by)) * (qscale * qscale))
                 .clip(-100, 100)  # to prevent clipping
                 .reshape((1, bx, 1, by, 1))
-            )
-            obj.enc = obj.encode_dct(bx, by)
-            obj.encq = obj.encode_quant(quant)
-            obj.encz = obj.encode_zip()
-            obj.decz = obj.decode_zip()
-            obj.decq = obj.decode_quant(quant)
-            obj.dec = obj.decode_dct(bx, by)
-            img_bgr = ycbcr2rgb(obj.dec)
-            cv2.imwrite("IMG_0108_recompressed_quant_{}_block_{}x{}.jpeg".format(
-                qscale, bx, by), img_bgr.astype(np.uint8))
+        )
+        self.enc = self.encode_dct(bx, by)
+        self.encq = self.encode_quant(quant)
+        self.encz = self.encode_zip()
+        self.decz = self.decode_zip()
+        self.decq = self.decode_quant(quant)
+        self.dec = self.decode_dct(bx, by)
+        img_bgr = ycbcr2rgb(self.dec)
+        cv2.imwrite("./output/compressed_quant_{}_block_{}x{}.jpeg".format(
+            qscale, bx, by), img_bgr.astype(np.uint8))
 
+    
+if __name__ == "__main__":
+    im = cv2.imread("./Data/study jams.png")
+    Ycr = rgb2ycbcr(im);
+    obj=jpeg(Ycr,[5])
+    quants = [5] 
+    blocks = [(8, 8)]  
+    for qscale in quants:
+        for bx, by in blocks:
+          obj.intiate(qscale,bx,by)
