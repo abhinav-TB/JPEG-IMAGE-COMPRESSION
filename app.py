@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import scipy.fftpack as fftpack
 import zlib
+from utils import *
 
 class jpeg_encoder:
     
@@ -11,20 +12,20 @@ class jpeg_encoder:
         self.quants = quants
         super().__init__()
 
-    def encode_quant(self,enc,quant):
+    def encode_quant(self,quant):
 
-        return (enc / quant).astype(np.int)
+        return (self.enc / quant).astype(np.int)
 
-    def decode_quant(self,orig,quant):
-        return (orig * quant).astype(float)
+    def decode_quant(self,quant):
+        return (self.encq * quant).astype(float)
 
-    def encode_dct(self,orig, bx, by):
+    def encode_dct(self,bx, by):
         new_shape = (
-            orig.shape[0] // bx * bx,
-            orig.shape[1] // by * by,
+            self.image.shape[0] // bx * bx,
+            self.image.shape[1] // by * by,
             3
         )
-        new = orig[
+        new = self.image[
             :new_shape[0],
             :new_shape[1]
         ].reshape((
@@ -37,25 +38,26 @@ class jpeg_encoder:
         return fftpack.dctn(new, axes=[1, 3], norm='ortho')
 
 
-    def decode_dct(self,orig, bx, by):
-        return fftpack.idctn(orig, axes=[1, 3], norm='ortho'
+    def decode_dct(self, bx, by):
+        return fftpack.idctn(self.decq, axes=[1, 3], norm='ortho'
                             ).reshape((
-                                orig.shape[0]*bx,
-                                orig.shape[2]*by,
+                                self.decq.shape[0]*bx,
+                                self.decq.shape[2]*by,
                                 3
                             ))
     
-    def encode_zip(self,x):
-        return zlib.compress(x.astype(np.int8).tobytes())
+    def encode_zip(self):
+        return zlib.compress(self.encq.astype(np.int8).tobytes())
 
 
-    def decode_zip(self,orig, shape):
-        return np.frombuffer(zlib.decompress(orig), dtype=np.int8).astype(float).reshape(shape)
+    def decode_zip(self):
+        return np.frombuffer(zlib.decompress(self.encz), dtype=np.int8).astype(float).reshape(self.encq.shape)
 
-
+    
 if __name__ == "__main__":
     im = cv2.imread("IMG_0108.JPG")
-    obj=jpeg_encoder(im,[5])
+    Ycr = rgb2ycbcr(im);
+    obj=jpeg_encoder(Ycr,[5])
     quants = [5]  # [0.5, 1, 2, 5, 10]
     blocks = [(8, 8)]  # [(2, 8), (8, 8), (16, 16), (32, 32), (200, 200)]
     for qscale in quants:
@@ -66,13 +68,13 @@ if __name__ == "__main__":
                 .clip(-100, 100)  # to prevent clipping
                 .reshape((1, bx, 1, by, 1))
             )
-            enc = obj.encode_dct(im, bx, by)
-            encq = obj.encode_quant(enc, quant)
-            encz = obj.encode_zip(encq)
-            decz = obj.decode_zip(encz, encq.shape)
-            decq = obj.decode_quant(encq, quant)
-            dec = obj.decode_dct(decq, bx, by)
-            # dec = obj.ycbcr2rgb(dec)
+            obj.enc = obj.encode_dct(bx, by)
+            obj.encq = obj.encode_quant(quant)
+            obj.encz = obj.encode_zip()
+            obj.decz = obj.decode_zip()
+            obj.decq = obj.decode_quant(quant)
+            obj.dec = obj.decode_dct(bx, by)
+            img_bgr = ycbcr2rgb(obj.dec)
             cv2.imwrite("IMG_0108_recompressed_quant_{}_block_{}x{}.jpeg".format(
-                qscale, bx, by), dec.astype(np.uint8))
+                qscale, bx, by), img_bgr.astype(np.uint8))
 

@@ -1,9 +1,6 @@
-# Huffman Coding in python
 
 string = 'BCAADDDCCACACAC'
 
-
-# Creating tree nodes
 class NodeTree(object):
 
     def __init__(self, left=None, right=None):
@@ -20,7 +17,6 @@ class NodeTree(object):
         return '%s_%s' % (self.left, self.right)
 
 
-# Main function implementing huffman coding
 def huffman_code_tree(node, left=True, binString=''):
     if type(node) is str:
         return {node: binString}
@@ -31,7 +27,6 @@ def huffman_code_tree(node, left=True, binString=''):
     return d
 
 
-# Calculating frequency
 freq = {}
 for c in string:
     if c in freq:
