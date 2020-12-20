@@ -4,6 +4,7 @@ import cv2
 import scipy.fftpack as fftpack
 import zlib
 from utils import *
+import getopt, sys
 
 class jpeg:
     
@@ -68,16 +69,60 @@ class jpeg:
         self.decq = self.decode_quant(quant)
         self.dec = self.decode_dct(bx, by)
         img_bgr = ycbcr2rgb(self.dec)
-        cv2.imwrite("./output/compressed_quant_{}_block_{}x{}.jpeg".format(
-            qscale, bx, by), img_bgr.astype(np.uint8))
+        #cv2.imwrite("./output/compressed_quant_{}_block_{}x{}.jpeg".format(
+        #    qscale, bx, by), img_bgr.astype(np.uint8))
+        cv2.imwrite("{}/compressed_quant_{}_block_{}x{}.jpeg".format(
+            output_dir, qscale, bx, by), img_bgr.astype(np.uint8))
 
     
 if __name__ == "__main__":
-    im = cv2.imread("./Data/IMG2.jpg")
+
+    argumentList = sys.argv[1:]
+    options = "i:o:q:b:"
+    long_options = ["input_dir =", "output_dir =", "quant_size =", "block_size ="]
+
+    try:
+        # Parsing argument
+        arguments, values = getopt.getopt(argumentList, options, long_options)
+
+        # checking each argument
+        for currentArgument, currentValue in arguments:
+
+            if currentArgument in ("-i", "--input_dir"):
+                #print (("input_dir: % s") % (currentValue))
+                input_dir = currentValue
+
+            elif currentArgument in ("-o", "--output_dir"):
+                #print (("output_dir: % s") % (currentValue))
+                output_dir = currentValue
+
+            elif currentArgument in ("-q", "--quant_size"):
+                #print (("quant_size: % s") % (currentValue))
+                quant_size = currentValue
+
+            elif currentArgument in ("-b", "--block_size"):
+                #print (("block_size: % s") % (currentValue))
+                block_size = currentValue
+                
+                
+    except getopt.error as err:
+        # output error, and return with an error code
+        print (str(err))
+
+    """ print ("input_dir: ",input_dir)
+    print ("output_dir: ",output_dir)
+    print ("quant_size: ",quant_size)
+    print ("block_size: ",block_size) """
+
+    im = cv2.imread(input_dir)
+    #im = cv2.imread("./Data/IMG2.jpg")
     Ycr = rgb2ycbcr(im);
     obj=jpeg(Ycr,[5])
-    quants = [5] 
-    blocks = [(8, 8)]  
+    #quants = [5] 
+    quants = [quant_size]
+    #blocks = [(8, 8)]
+    blocks = [block_size]  
     for qscale in quants:
         for bx, by in blocks:
           obj.intiate(qscale,bx,by)
+
