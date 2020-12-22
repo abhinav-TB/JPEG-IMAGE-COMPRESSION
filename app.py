@@ -4,6 +4,7 @@ import cv2
 import scipy.fftpack as fftpack
 import zlib
 from utils import *
+import getopt, sys
 
 class jpeg:
     
@@ -68,16 +69,55 @@ class jpeg:
         self.decq = self.decode_quant(quant)
         self.dec = self.decode_dct(bx, by)
         img_bgr = ycbcr2rgb(self.dec)
-        cv2.imwrite("./output/compressed_quant_{}_block_{}x{}.jpeg".format(
-            qscale, bx, by), img_bgr.astype(np.uint8))
+
+        cv2.imwrite("{}/compressed_quant_{}_block_{}x{}.jpeg".format(
+            output_dir, qscale, bx, by), img_bgr.astype(np.uint8))
 
     
 if __name__ == "__main__":
-    im = cv2.imread("./Data/IMG2.jpg")
+
+    '''Implimenting command line argument feature'''
+
+    argumentList = sys.argv[1:]
+    options = "i:o:q:b:"
+    long_options = ["input_dir =", "output_dir =", "quant_size =", "block_size ="]
+
+    try:
+        input_dir = "./Data/IMG2.jpg"
+        output_dir = "./output"
+        quant_size = [5]
+        block_size = [(8,8)]
+
+        arguments, values = getopt.getopt(argumentList, options, long_options)
+
+        for currentArgument, currentValue in arguments:
+
+            if currentArgument in ("-i", "--input_dir"):
+                input_dir = currentValue
+
+            elif currentArgument in ("-o", "--output_dir"):
+                output_dir = currentValue
+
+            elif currentArgument in ("-q", "--quant_size"):
+                quant_size = int(currentValue)
+
+            elif currentArgument in ("-b", "--block_size"):
+                block_size = tuple(currentValue)
+                a = int(''.join(map(str, block_size[0]))) 
+                b = int(''.join(map(str, block_size[2])))
+                block_size = (a,b)
+                
+                
+    except getopt.error as err:
+        print (str(err))
+    '''*****************************************************'''
+    
+    im = cv2.imread(input_dir)
     Ycr = rgb2ycbcr(im);
     obj=jpeg(Ycr,[5])
-    quants = [5] 
-    blocks = [(8, 8)]  
+    quants = [quant_size]
+    blocks = [block_size]  
     for qscale in quants:
         for bx, by in blocks:
           obj.intiate(qscale,bx,by)
+
