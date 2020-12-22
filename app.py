@@ -83,6 +83,11 @@ if __name__ == "__main__":
     long_options = ["input_dir =", "output_dir =", "quant_size =", "block_size ="]
 
     try:
+        input_dir = "./Data/IMG2.jpg"
+        output_dir = "./output"
+        quant_size = [5]
+        block_size = [(8,8)]
+
         arguments, values = getopt.getopt(argumentList, options, long_options)
 
         for currentArgument, currentValue in arguments:
@@ -94,10 +99,13 @@ if __name__ == "__main__":
                 output_dir = currentValue
 
             elif currentArgument in ("-q", "--quant_size"):
-                quant_size = currentValue
+                quant_size = int(currentValue)
 
             elif currentArgument in ("-b", "--block_size"):
-                block_size = currentValue
+                block_size = tuple(currentValue)
+                a = int(''.join(map(str, block_size[0]))) 
+                b = int(''.join(map(str, block_size[2])))
+                block_size = (a,b)
                 
                 
     except getopt.error as err:
