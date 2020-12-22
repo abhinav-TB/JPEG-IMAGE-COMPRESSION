@@ -13,11 +13,24 @@ This implementation is only for educational purposes and may not be production r
     
     pip install -r requirements.txt
 
-**## USAGE**
+**USAGE**
    
 
     python3 app.py
    
+
+**OPTIONAL ARGUMENTS**
+
+|  -i  |  path to input directory  |
+
+| -o  |  path to ouput directory|
+
+| -q   |  quant size |
+
+| -b   |  block size |
+
+
+
 
 **REFERENCES**
 
