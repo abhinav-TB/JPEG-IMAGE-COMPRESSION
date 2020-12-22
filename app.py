@@ -77,16 +77,15 @@ class jpeg:
 if __name__ == "__main__":
 
     '''Implimenting command line argument feature'''
-
+    input_dir = "./Data/IMG2.jpg"
+    output_dir = "./output"
+    quant_size = 5
+    block_size = 8
     argumentList = sys.argv[1:]
     options = "i:o:q:b:"
     long_options = ["input_dir =", "output_dir =", "quant_size =", "block_size ="]
 
     try:
-        input_dir = "./Data/IMG2.jpg"
-        output_dir = "./output"
-        quant_size = [5]
-        block_size = [(8,8)]
 
         arguments, values = getopt.getopt(argumentList, options, long_options)
 
@@ -102,10 +101,7 @@ if __name__ == "__main__":
                 quant_size = int(currentValue)
 
             elif currentArgument in ("-b", "--block_size"):
-                block_size = tuple(currentValue)
-                a = int(''.join(map(str, block_size[0]))) 
-                b = int(''.join(map(str, block_size[2])))
-                block_size = (a,b)
+                block_size = int(currentValue)
                 
                 
     except getopt.error as err:
@@ -116,7 +112,7 @@ if __name__ == "__main__":
     Ycr = rgb2ycbcr(im);
     obj=jpeg(Ycr,[5])
     quants = [quant_size]
-    blocks = [block_size]  
+    blocks = [(block_size,block_size)]  
     for qscale in quants:
         for bx, by in blocks:
           obj.intiate(qscale,bx,by)
